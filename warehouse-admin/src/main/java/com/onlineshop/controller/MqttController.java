@@ -19,7 +19,7 @@ public class MqttController {
 	@Autowired
 	MqttGateway mqtGateway;
 
-	@PostMapping("/add-item")
+	@PostMapping("/add-item-to-db")
 	public ResponseEntity<?> publish(@RequestBody String mqttMessage){
 		try {
 			JsonObject convertObject = new Gson().fromJson(mqttMessage, JsonObject.class);
@@ -29,9 +29,13 @@ public class MqttController {
 			MqttClient client = new MqttClient("tcp://mosquitto:1883", MqttClient.generateClientId());
 			client.connect();
 
-			String topic = convertObject.get("topic").toString();
-			topic = topic.replaceAll("^\"|\"$", "");
-			String msg = convertObject.get("message").toString();
+			String id = convertObject.get("id").toString();
+			id = id.replaceAll("^\"|\"$", "");
+			String topic = "item_back_in_stock" + "_" + id;
+			String msg = convertObject.get("data").toString();
+
+			System.out.println("Publish to topic: " + topic);
+			System.out.println("Publish data: " + msg);
 
 			MqttMessage message = new MqttMessage();
 			message.setPayload(msg.getBytes());

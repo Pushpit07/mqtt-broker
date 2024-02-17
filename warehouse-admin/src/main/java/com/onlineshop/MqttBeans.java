@@ -57,14 +57,14 @@ public class MqttBeans {
 
 			@Override
 			public void handleMessage(Message<?> message) throws MessagingException {
-				String topic = message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC).toString();
-				topic = topic.replaceAll("^\"|\"$", "");
-				if (topic.equals("item_back_in_stock")) {
-					System.out.println("This is the correct topic");	
-				} else {
-					System.out.println("!X  Not subscribed to this topic  X!");
-				}
-				System.out.println(message.getPayload());
+				// String topic = message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC).toString();
+				// topic = topic.replaceAll("^\"|\"$", "");
+				// if (topic.equals("item_back_in_stock")) {
+				// 	System.out.println("This is the correct topic");	
+				// } else {
+				// 	System.out.println("!X  Not subscribed to this topic  X!");
+				// }
+				// System.out.println(message.getPayload());
 			}
 		};
 	}
