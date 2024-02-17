@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  mosquitto:
+    container_name: mosquitto
+    image: eclipse-mosquitto:latest
+    restart: always
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+
+  master:
+    container_name: springboot-master
+    build: ./springboot-master
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mosquitto
+
+  warehouse-admin:
+    container_name: warehouse-admin
+    build: ./warehouse-admin
+    restart: always
+    ports:
+      - "8081:8080"
+    depends_on:
+      - mosquitto
+      - master
+  # client1:
+  #   container_name: client1
+  #   build: ./client1
+  #   restart: always
+  #   ports:
+  #     - "8082:8080"
+  #   depends_on:
+  #     - mosquitto
+  #     - master
+
+  # client2:
+  #   container_name: client2
+  #   build: ./client2
+  #   restart: always
+  #   ports:
+  #     - "8083:8080"
+  #   depends_on:
+  #     - mosquitto
+  #     - master
+
+networks:
+  default:
+    driver: bridge
