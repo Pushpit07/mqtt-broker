@@ -83,11 +83,13 @@ public class MqttController {
 			String topic = "item_back_in_stock" + "_" + id;
 
             if (subscribedTopics.contains(topic)) {
-                client.unsubscribe(topic);
-                client.disconnect();
-                client.close();
-                subscribedTopics.remove(topic);
-                System.out.println("Unsubscribed from topic: " + topic);
+                if (client.isConnected()) {
+                    client.unsubscribe(topic);
+                    client.disconnect();
+                    client.close();
+                    subscribedTopics.remove(topic);
+                    System.out.println("Unsubscribed from topic: " + topic);
+                }
             } else {
                 System.out.println("Not subscribed to topic: " + topic);
             }
