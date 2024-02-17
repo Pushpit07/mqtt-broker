@@ -31,16 +31,16 @@ services:
     depends_on:
       - mosquitto
       - master
-  # client1:
-  #   container_name: client1
-  #   build: ./client1
-  #   restart: always
-  #   ports:
-  #     - "8082:8080"
-  #   depends_on:
-  #     - mosquitto
-  #     - master
 
+  client1:
+    container_name: client1
+    build: ./client1
+    restart: always
+    ports:
+      - "8082:8080"
+    depends_on:
+      - mosquitto
+      - master
   # client2:
   #   container_name: client2
   #   build: ./client2

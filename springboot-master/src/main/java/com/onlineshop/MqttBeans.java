@@ -43,9 +43,9 @@ public class MqttBeans {
 		MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter("serverIn",
 				mqttClientFactory(), "#");
 
-		adapter.setCompletionTimeout(5000);
+		adapter.setCompletionTimeout(500000);
 		adapter.setConverter(new DefaultPahoMessageConverter());
-		adapter.setQos(2);
+		adapter.setQos(1);
 		adapter.setOutputChannel(mqttInputChannel());
 		return adapter;
 	}
@@ -58,8 +58,8 @@ public class MqttBeans {
 			@Override
 			public void handleMessage(Message<?> message) throws MessagingException {
 				String topic = message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC).toString();	
-				System.out.println(topic);
-				if (topic.trim().equals('item_back_in_stock')) {
+				topic = topic.replaceAll("^\"|\"$", "");
+				if (topic.equals("item_back_in_stock")) {
 					System.out.println("This is the correct topic");	
 				} else {
 					System.out.println("!X  Not subscribed to this topic  X!");

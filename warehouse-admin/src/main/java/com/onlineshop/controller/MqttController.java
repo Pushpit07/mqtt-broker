@@ -6,6 +6,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+
 import com.onlineshop.MqttGateway;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -19,7 +23,14 @@ public class MqttController {
 	public ResponseEntity<?> publish(@RequestBody String mqttMessage){
 		try {
 			JsonObject convertObject = new Gson().fromJson(mqttMessage, JsonObject.class);
-			mqtGateway.sendToMqtt(convertObject.get("message").toString(), convertObject.get("topic").toString());
+			// mqtGateway.sendToMqtt(convertObject.get("message").toString(), convertObject.get("topic").toString());
+			// return ResponseEntity.ok("Success");
+			MqttClient client = new MqttClient("tcp://mosquitto:1883", MqttClient.generateClientId());
+			client.connect();
+			MqttMessage message = new MqttMessage();
+			message.setPayload(convertObject.get("message").toString().getBytes());
+			client.publish("item_back_in_stock", message);
+			client.disconnect();
 			return ResponseEntity.ok("Success");
 		} catch(Exception ex) {
 			ex.printStackTrace();
