@@ -25,12 +25,19 @@ public class MqttController {
 			JsonObject convertObject = new Gson().fromJson(mqttMessage, JsonObject.class);
 			// mqtGateway.sendToMqtt(convertObject.get("message").toString(), convertObject.get("topic").toString());
 			// return ResponseEntity.ok("Success");
+
 			MqttClient client = new MqttClient("tcp://mosquitto:1883", MqttClient.generateClientId());
 			client.connect();
+
+			String topic = convertObject.get("topic").toString();
+			topic = topic.replaceAll("^\"|\"$", "");
+			String msg = convertObject.get("message").toString();
+
 			MqttMessage message = new MqttMessage();
-			message.setPayload(convertObject.get("message").toString().getBytes());
-			client.publish("item_back_in_stock", message);
+			message.setPayload(msg.getBytes());
+			client.publish(topic, message);
 			client.disconnect();
+
 			return ResponseEntity.ok("Success");
 		} catch(Exception ex) {
 			ex.printStackTrace();

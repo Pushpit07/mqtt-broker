@@ -45,7 +45,7 @@ public class MqttBeans {
 
 		adapter.setCompletionTimeout(500000);
 		adapter.setConverter(new DefaultPahoMessageConverter());
-		adapter.setQos(1);
+		adapter.setQos(2);
 		adapter.setOutputChannel(mqttInputChannel());
 		return adapter;
 	}

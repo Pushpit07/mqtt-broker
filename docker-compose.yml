@@ -13,43 +13,32 @@ services:
       - "1883:1883"
       - "9001:9001"
 
-  master:
-    container_name: springboot-master
-    build: ./springboot-master
+  warehouse-admin:
+    container_name: warehouse-admin
+    build: ./warehouse-admin
     restart: always
     ports:
       - "8080:8080"
     depends_on:
       - mosquitto
 
-  warehouse-admin:
-    container_name: warehouse-admin
-    build: ./warehouse-admin
-    restart: always
-    ports:
-      - "8081:8080"
-    depends_on:
-      - mosquitto
-      - master
-
   client1:
-    container_name: client1
+    container_name: client-1
     build: ./client1
     restart: always
     ports:
-      - "8082:8080"
+      - "8081:8081"
     depends_on:
       - mosquitto
-      - master
-  # client2:
-  #   container_name: client2
-  #   build: ./client2
-  #   restart: always
-  #   ports:
-  #     - "8083:8080"
-  #   depends_on:
-  #     - mosquitto
-  #     - master
+
+  client2:
+    container_name: client-2
+    build: ./client2
+    restart: always
+    ports:
+      - "8082:8082"
+    depends_on:
+      - mosquitto
 
 networks:
   default:
