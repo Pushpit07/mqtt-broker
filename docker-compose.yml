@@ -2,7 +2,7 @@ version: '3'
 
 services:
   mosquitto:
-    container_name: mosquitto
+    container_name: mosquitto-event-broker
     image: eclipse-mosquitto:latest
     restart: always
     volumes:
@@ -13,9 +13,9 @@ services:
       - "1883:1883"
       - "9001:9001"
 
-  warehouse-admin:
-    container_name: warehouse-admin
-    build: ./warehouse-admin
+  warehouse-service:
+    container_name: warehouse-service
+    build: ./warehouse-service
     restart: always
     ports:
       - "8080:8080"
@@ -37,6 +37,33 @@ services:
     restart: always
     ports:
       - "8082:8082"
+    depends_on:
+      - mosquitto
+
+  master-web-service:
+    container_name: master-web-service
+    build: ./master-web-service
+    restart: always
+    ports:
+      - "8083:8083"
+    depends_on:
+      - mosquitto
+
+  order-service:
+    container_name: order-service
+    build: ./order-service
+    restart: always
+    ports:
+      - "8084:8084"
+    depends_on:
+      - mosquitto
+
+  delivery-service:
+    container_name: delivery-service
+    build: ./delivery-service
+    restart: always
+    ports:
+      - "8085:8085"
     depends_on:
       - mosquitto
 

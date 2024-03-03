@@ -32,9 +32,43 @@ public class MqttController {
 			String clientId = MqttClient.generateClientId();
             int subQos = 2;
 
-            String id = convertObject.get("id").toString();
-			id = id.replaceAll("^\"|\"$", "");
-			String topic = "item_back_in_stock" + "_" + id;
+            String id;
+            String topic = "item";
+            JsonObject dataObject = convertObject.getAsJsonObject("data");
+
+            if(convertObject.has("id")) {
+                id = convertObject.get("id").toString();
+                id = id.replaceAll("^\"|\"$", "");
+            } else{
+                id = null;
+            } 
+
+            if (dataObject.has("country")) {
+                String country = dataObject.get("country").getAsString();
+                topic = topic + "/" + country;
+            } else {
+                topic = topic + "/+";
+            }
+
+            if (dataObject.has("city")) {
+                String city = dataObject.get("city").getAsString();
+                topic = topic + "/" + city;
+            } else {
+                topic = topic + "/+";
+            }
+
+            if (dataObject.has("category")) {
+                String category = dataObject.get("category").getAsString();
+                topic = topic + "/" + category;
+            } else {
+                topic = topic + "/+";
+            }
+
+            if (id != null) {
+                topic = topic + "/" + id + "/back_in_stock";
+            } else {
+                topic = topic + "/+" + "/back_in_stock";
+            }  
 			
 			client = new MqttClient(broker, clientId);
 			MqttConnectOptions options = new MqttConnectOptions();
@@ -45,6 +79,7 @@ public class MqttController {
                 if (client.isConnected()) {
                     client.setCallback(new MqttCallback() {
                         public void messageArrived(String _topic, MqttMessage message) throws Exception {
+                            System.out.println("\nCurrently Subscribed Topics: " + subscribedTopics);
                             System.out.println("\ntopic: " + _topic);
                             System.out.println("qos: " + message.getQos());
                             System.out.println("data: " + new String(message.getPayload()) + "\n");
@@ -78,9 +113,44 @@ public class MqttController {
     public ResponseEntity<?> unsubscribeFromItem(@RequestBody String mqttMessage) {
         try {
             JsonObject convertObject = new Gson().fromJson(mqttMessage, JsonObject.class);
-            String id = convertObject.get("id").toString();
-			id = id.replaceAll("^\"|\"$", "");
-			String topic = "item_back_in_stock" + "_" + id;
+            
+            String id;
+            String topic = "item";
+            JsonObject dataObject = convertObject.getAsJsonObject("data");
+
+            if(convertObject.has("id")) {
+                id = convertObject.get("id").toString();
+                id = id.replaceAll("^\"|\"$", "");
+            } else{
+                id = null;
+            } 
+
+            if (dataObject.has("country")) {
+                String country = dataObject.get("country").getAsString();
+                topic = topic + "/" + country;
+            } else {
+                topic = topic + "/+";
+            }
+
+            if (dataObject.has("city")) {
+                String city = dataObject.get("city").getAsString();
+                topic = topic + "/" + city;
+            } else {
+                topic = topic + "/+";
+            }
+
+            if (dataObject.has("category")) {
+                String category = dataObject.get("category").getAsString();
+                topic = topic + "/" + category;
+            } else {
+                topic = topic + "/+";
+            }
+
+            if (id != null) {
+                topic = topic + "/" + id + "/back_in_stock";
+            } else {
+                topic = topic + "/+" + "/back_in_stock";
+            }
 
             if (subscribedTopics.contains(topic)) {
                 if (client.isConnected()) {

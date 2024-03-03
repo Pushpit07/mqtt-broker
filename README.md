@@ -2,6 +2,10 @@
 
 A dockerized Mosquitto broker implemented in Java
 
+## Mosquitto Docs
+
+https://mosquitto.org/man/mqtt-7.html
+
 
 ## How to build?
 

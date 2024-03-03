@@ -15,12 +15,12 @@ import com.google.gson.JsonObject;
 @RestController
 public class MqttController {
 
-	@PostMapping("/add-item-to-db")
-	public ResponseEntity<?> addItemToDb(@RequestBody String mqttMessage){
+	@PostMapping("/purchase-item")
+	public ResponseEntity<?> purchaseItem(@RequestBody String mqttMessage){
 		try {
-			JsonObject convertObject = new Gson().fromJson(mqttMessage, JsonObject.class);
+			System.out.println("\n\nInitiating purchase...\n\n");
 
-			// perform add to db operation
+			JsonObject convertObject = new Gson().fromJson(mqttMessage, JsonObject.class);
 
 			// publish event to topic
 			MqttClient client = new MqttClient("tcp://mosquitto:1883", MqttClient.generateClientId());
@@ -28,8 +28,25 @@ public class MqttController {
 
 			String id = convertObject.get("id").toString();
 			id = id.replaceAll("^\"|\"$", "");
-			String topic = "item_back_in_stock" + "_" + id;
-			String msg = convertObject.get("data").toString();
+			String topic = "check_item_in_warehouse";
+
+			JsonObject dataObject = convertObject.getAsJsonObject("data");
+			String name = dataObject.get("name").getAsString();
+			int quantity = dataObject.get("quantity").getAsInt();
+			String category = dataObject.get("category").getAsString();
+			String country = dataObject.get("country").getAsString();
+			String city = dataObject.get("city").getAsString();
+
+			// Create a new JSON object
+			JsonObject resultObject = new JsonObject();
+			resultObject.addProperty("id", id);
+			resultObject.addProperty("name", name);
+			resultObject.addProperty("category", category);
+			resultObject.addProperty("country", country);
+			resultObject.addProperty("city", city);
+			resultObject.addProperty("quantity", quantity);
+
+			String msg = resultObject.toString();
 
 			System.out.println("Publish to topic: " + topic);
 			System.out.println("Publish data: " + msg);
