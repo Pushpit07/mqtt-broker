@@ -90,7 +90,7 @@ public class MqttController {
                         }
 
                         public void deliveryComplete(IMqttDeliveryToken token) {
-                            System.out.println("deliveryComplete: " + token.isComplete());
+                            // System.out.println("deliveryComplete: " + token.isComplete());
                         }
                     });
 

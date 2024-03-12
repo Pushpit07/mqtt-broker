@@ -1,6 +1,6 @@
 # MQTT Broker
 
-A dockerized Mosquitto broker implemented in Java
+A dockerized Mosquitto broker implemented in Java using the SAGA Orchestration pattern
 
 ## Mosquitto Docs
 
