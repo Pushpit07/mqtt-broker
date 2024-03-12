@@ -11,6 +11,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 
 @RestController
 public class MqttController {
@@ -18,6 +19,7 @@ public class MqttController {
 	@PostMapping("/purchase-item")
 	public ResponseEntity<?> purchaseItem(@RequestBody String mqttMessage){
 		try {
+			System.out.println("\nReceived purchase request\n");
 			System.out.println("\n\nInitiating purchase...\n\n");
 
 			JsonObject convertObject = new Gson().fromJson(mqttMessage, JsonObject.class);
@@ -36,6 +38,15 @@ public class MqttController {
 			String category = dataObject.get("category").getAsString();
 			String country = dataObject.get("country").getAsString();
 			String city = dataObject.get("city").getAsString();
+			JsonElement errorElement = dataObject.get("error");
+			String error;
+			// Check if the "error" property exists and is not null
+			if (errorElement != null) {
+				error = errorElement.getAsJsonPrimitive().getAsString();
+			} else {
+				// Handle the case where "error" is not present or is null
+				error = null;
+			}
 
 			// Create a new JSON object
 			JsonObject resultObject = new JsonObject();
@@ -45,10 +56,13 @@ public class MqttController {
 			resultObject.addProperty("country", country);
 			resultObject.addProperty("city", city);
 			resultObject.addProperty("quantity", quantity);
+			if (error != null) {
+				resultObject.addProperty("error", error);
+			}
 
 			String msg = resultObject.toString();
 
-			System.out.println("Publish to topic: " + topic);
+			System.out.println("\nPublish to topic: " + topic);
 			System.out.println("Publish data: " + msg);
 
 			MqttMessage message = new MqttMessage();

@@ -27,7 +27,8 @@ public class MyApplicationRunner implements ApplicationRunner {
 			String clientId = MqttClient.generateClientId();
             int subQos = 2;
 
-            String topic = "deliver_item";
+            String topic1 = "deliver_item";
+            String topic2 = "deliver_item_compensation";
 			
 			client = new MqttClient(broker, clientId);
 			MqttConnectOptions options = new MqttConnectOptions();
@@ -40,6 +41,12 @@ public class MyApplicationRunner implements ApplicationRunner {
                         System.out.println("\ntopic: " + topic);
                         System.out.println("qos: " + message.getQos());
                         System.out.println("data: " + new String(message.getPayload()) + "\n");
+
+                        if (topic.equals(topic1)) {
+                            deliverItem(message);
+                        } else if (topic.equals(topic2)) {
+                            deliverItemCompensatingAction(message);
+                        }
                     }
 
                     public void connectionLost(Throwable cause) {
@@ -47,15 +54,64 @@ public class MyApplicationRunner implements ApplicationRunner {
                     }
 
                     public void deliveryComplete(IMqttDeliveryToken token) {
-                        System.out.println("deliveryComplete: " + token.isComplete());
+                        // System.out.println("deliveryComplete: " + token.isComplete());
                     }
                 });
 
-                client.subscribe(topic, subQos);
-                System.out.println("Subscribed to topic: " + topic);
+                client.subscribe(topic1, subQos);
+                client.subscribe(topic2, subQos);
+                System.out.println("Subscribed to topic: " + topic1);
+                System.out.println("Subscribed to topic: " + topic2);
             }
 		} catch(Exception ex) {
 			ex.printStackTrace();
 		}
+    }
+
+    private void deliverItem(MqttMessage message) {
+        try {
+            System.out.println("Delivering item from warehouse: " + message);
+            //
+            // Perform the deliver operation
+            //
+            // If delivery fails, publish to compensation topic
+            String error = getErrorFromMessage(message);
+            if ("delivery_failed".equals(error)) {
+               throw new IllegalStateException("Delivery failed: " + error);
+            }
+            // Else publish to client that item has been delivered
+            String deliverItemTopic = "item_delivered";
+            client.publish(deliverItemTopic, message);
+        } catch(Exception ex) {
+            try {
+                // If delivery fails, publish to compensation topic
+                String deliverItemCompensationTopic = "deliver_item_compensation";
+                client.publish(deliverItemCompensationTopic, message);
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void deliverItemCompensatingAction(MqttMessage message) {
+        try {
+            System.out.println("Compensation action for delivering item from warehouse: " + message);
+            String warehouseUpdateCompensationTopic = "warehouse_update_compensation";
+            client.publish(warehouseUpdateCompensationTopic, message);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private String getErrorFromMessage(MqttMessage message) {
+        // Parse the incoming message payload 
+        String payload = new String(message.getPayload());
+        JsonObject orderData = new Gson().fromJson(payload, JsonObject.class);
+
+        if (orderData.has("error")) {
+            return orderData.get("error").getAsString();
+        } else {
+            return null;
+        }
     }
 }
